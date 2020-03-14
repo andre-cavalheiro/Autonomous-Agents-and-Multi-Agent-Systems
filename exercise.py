@@ -12,14 +12,23 @@ class Agent:
 
     def __init__(self, options):
         ignoreTerms = ['', '\n']
-        intTerms = ['cycle', 'restart']
+        numberParameters = ['cycle', 'restart']
         for i in range(len(options)):
             if options[i] in ignoreTerms:
                 break
             paramInfo = options[i].split('=')
             paramName = paramInfo[0]
-            paramValue = paramInfo[1] if paramName not in intTerms else int(paramInfo[1])
+            paramValue = paramInfo[1] if paramName not in numberParameters else int(paramInfo[1])
             self.configuration[paramName] = paramValue
+
+        if 'restart' not in self.configuration.keys():
+            self.configuration['restart'] = 0
+
+        if 'society' in self.configuration['decision'].keys():
+            assert('agents' in self.configuration.keys())
+            agentsAsString = self.configuration['agents']
+            agents = agentsAsString.replace('{', '').replace('}', '').split(',')
+            self.configuration['agents'] = [self.createAgents(n) for n in agents]
 
         self.printParams()
 
@@ -34,45 +43,53 @@ class Agent:
             # Update utility
             splitInput = input.split(' ')
             realUtility = splitInput[1].split('=')[1]
-            self.tasks[self.lastTaskIndex]['utility'] = float(realUtility)
-            print(':: Updated utility for {}'.format(self.tasks[self.lastTaskIndex]['name']))
+            if 'society' in self.configuration['decision']:
+                raise Exception('Not implemented')
+            else:
+                self.tasks[self.lastTaskIndex]['utility'] = float(realUtility)
+                print(':: Updated utility for {}'.format(self.tasks[self.lastTaskIndex]['name']))
         else:
             raise Exception('Unknown perception: {}'.format(input))
 
     def decide_act(self):
         if self.configuration['decision'] == 'rationale':
-            # Simply chooses task with higher known utility
+            # Chooses task with higher known utility
             maxExpectUtilityIndex = max(range(len(self.tasks)), key=lambda
                 index: self.tasks[index]['utility'])
-            if 'restart' in self.configuration.keys():
-                if self.tasks[maxExpectUtilityIndex]['preparation'] < self.configuration['restart']:
-                    self.tasks[maxExpectUtilityIndex]['preparation'] += 1
-                    print('>> Preparation step for task {}'.format(self.tasks[maxExpectUtilityIndex]['name']))
-                    return
-                else:
-                    self.tasks[maxExpectUtilityIndex]['timesExecuted'] += 1
-                    self.lastTaskIndex = maxExpectUtilityIndex
-                    print('-> Executed task {}'.format(self.tasks[maxExpectUtilityIndex]['name']))
+
+            if self.tasks[maxExpectUtilityIndex]['preparation'] < self.configuration['restart']:
+                self.tasks[maxExpectUtilityIndex]['preparation'] += 1
+                print('>> Preparation step for task {}'.format(self.tasks[maxExpectUtilityIndex]['name']))
+                return
             else:
                 self.tasks[maxExpectUtilityIndex]['timesExecuted'] += 1
                 self.lastTaskIndex = maxExpectUtilityIndex
                 print('-> Executed task {}'.format(self.tasks[maxExpectUtilityIndex]['name']))
+
         elif self.configuration['decision'] == 'flexible':
             raise Exception('Not Implemented')
+        elif self.configuration['decision'] == 'homogeneous-society':
+            raise Exception('Not Implemented')
+        elif self.configuration['decision'] == 'heterogeneous-society':
+            raise Exception('Not Implemented')
+
         else:
             raise Exception('Unknown agent type {}'.format(self.decisionType))
 
     def recharge(self):
-        results = 'state={'
-        gain = 0
-        for i, ct in enumerate(self.tasks):
-            gain += ct['utility']*ct['timesExecuted']
-            results += '{}={:.2f}'.format(ct['name'], ct['utility']) if ct['timesExecuted'] !=0 \
-                else '{}=NA'.format(ct['name'])
-            if i != len(self.tasks)-1:
-                results += ','
-        results += '}} gain={:.2f}'.format(gain)
-        return results
+        if 'society' in self.configuration['decision']:
+            raise Exception('Not implemented')
+        else:
+            results = 'state={'
+            gain = 0
+            for i, ct in enumerate(self.tasks):
+                gain += ct['utility']*ct['timesExecuted']
+                results += '{}={:.2f}'.format(ct['name'], ct['utility']) if ct['timesExecuted'] !=0 \
+                    else '{}=NA'.format(ct['name'])
+                if i != len(self.tasks)-1:
+                    results += ','
+            results += '}} gain={:.2f}'.format(gain)
+            return results
 
     def printParams(self):
         print('== Current Configuration ==')
@@ -81,19 +98,20 @@ class Agent:
         print('============================')
 
     def createTask(self, name, utility):
-        if 'restart' in self.configuration.keys():
-            return {
+        task = {
                 'name': name,
+                'timesExecuted': 0,
                 'preparation': 0,
-                'timesExecuted': 0,
                 'utility': float(utility),
             }
-        else:
-            return {
+        return task
+
+    def createAgents(self, name):
+        agent = {
                 'name': name,
-                'timesExecuted': 0,
-                'utility': float(utility),
+                'taskHistory': []
             }
+        return agent
 
 
 #####################
