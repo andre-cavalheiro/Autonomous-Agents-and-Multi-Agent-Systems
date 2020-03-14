@@ -12,13 +12,13 @@ class Agent:
 
     def __init__(self, options):
         ignoreTerms = ['', '\n']
-
+        intTerms = ['cycle', 'restart']
         for i in range(len(options)):
             if options[i] in ignoreTerms:
                 break
             paramInfo = options[i].split('=')
             paramName = paramInfo[0]
-            paramValue = paramInfo[1]
+            paramValue = paramInfo[1] if paramName not in intTerms else int(paramInfo[1])
             self.configuration[paramName] = paramValue
 
         self.printParams()
@@ -44,9 +44,19 @@ class Agent:
             # Simply chooses task with higher known utility
             maxExpectUtilityIndex = max(range(len(self.tasks)), key=lambda
                 index: self.tasks[index]['utility'])
-            self.tasks[maxExpectUtilityIndex]['timesExecuted'] += 1
-            self.lastTaskIndex = maxExpectUtilityIndex
-            print('-> Executed task {}'.format(self.tasks[maxExpectUtilityIndex]['name']))
+            if 'restart' in self.configuration.keys():
+                if self.tasks[maxExpectUtilityIndex]['preparation'] < self.configuration['restart']:
+                    self.tasks[maxExpectUtilityIndex]['preparation'] += 1
+                    print('>> Preparation step for task {}'.format(self.tasks[maxExpectUtilityIndex]['name']))
+                    return
+                else:
+                    self.tasks[maxExpectUtilityIndex]['timesExecuted'] += 1
+                    self.lastTaskIndex = maxExpectUtilityIndex
+                    print('-> Executed task {}'.format(self.tasks[maxExpectUtilityIndex]['name']))
+            else:
+                self.tasks[maxExpectUtilityIndex]['timesExecuted'] += 1
+                self.lastTaskIndex = maxExpectUtilityIndex
+                print('-> Executed task {}'.format(self.tasks[maxExpectUtilityIndex]['name']))
         elif self.configuration['decision'] == 'flexible':
             raise Exception('Not Implemented')
         else:
@@ -71,18 +81,26 @@ class Agent:
         print('============================')
 
     def createTask(self, name, utility):
-        return {
-            'name': name,
-            'timesExecuted': 0,
-            'utility': float(utility),
-        }
+        if 'restart' in self.configuration.keys():
+            return {
+                'name': name,
+                'preparation': 0,
+                'timesExecuted': 0,
+                'utility': float(utility),
+            }
+        else:
+            return {
+                'name': name,
+                'timesExecuted': 0,
+                'utility': float(utility),
+            }
 
 
 #####################
 ### B: MAIN UTILS ###
 #####################
 
-fileName = 'statement\T01_input.txt'
+fileName = 'statement\T02_input.txt'
 f = open(fileName, 'r')
 line = f.readline()
 
