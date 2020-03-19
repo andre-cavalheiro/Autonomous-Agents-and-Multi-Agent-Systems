@@ -34,3 +34,9 @@ def calculateUtilityWithMemoryFactor(memoryFactor, currentStep, utilityHistory):
     formulaTerms = [u*(((i+1)**memoryFactor)/denominator) for i, u in enumerate(utilityHistory)]
     utility = sum(formulaTerms)
     return utility
+
+
+def calculateExpectedUtility(utilityHistory):
+    expectedUtility = sum(utilityHistory)/len(utilityHistory)
+    return expectedUtility
+
