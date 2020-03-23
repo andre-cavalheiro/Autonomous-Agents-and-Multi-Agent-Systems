@@ -40,7 +40,7 @@ class Agent:
             self.multiAgent = True
             assert('agents' in self.configuration.keys())
             agentsAsString = self.configuration['agents']
-            agents = agentsAsString.replace('{', '').replace('}', '').split(',')
+            agents = agentsAsString.replace('{', '').replace('}', '').replace('[', '').replace(']', '').split(',')
             self.agents = {n: self.createAgent(n) for n in agents}
         else:
             self.agents = {'A': self.createAgent('A')}
@@ -53,7 +53,6 @@ class Agent:
             for k, a in self.agents.items():
                 a.newTask(self.createTask(taskName, expectedUtility))
 
-            print('- Aware of task {}'.format(taskName))
         elif input.startswith('A'):
             # Update utility
             splitInput = input.split(' ')
@@ -76,15 +75,17 @@ class Agent:
             a.incrementStep()
 
     def recharge(self):
-        multiAgent = len(self.agents.keys()) > 1
-        statment, gain = 'state={', 0
+        statment = 'state={' if self.multiAgent else 'state='
+        gain = 0
         for k, a in self.agents.items():
-            agentResults = a.getFinalStatment(multiAgent)
+            agentResults = a.getFinalStatment(self.multiAgent)
             statment += agentResults
             gain += a.getGain()
-            if multiAgent:
+            if self.multiAgent:
                 statment += ','
-        statment += '}} gain={:.2f}'.format(gain)
+        if self.multiAgent:
+            statment += '}'
+        statment += ' gain={:.2f}'.format(gain)
         return statment
 
     def createTask(self, name, utility):
@@ -116,7 +117,8 @@ class Agent:
 ### B: MAIN UTILS ###
 #####################
 
-fileName = 'statement\T05_input.txt'
+#fileName = 'statement\T03_input.txt'
+fileName = 'cases\T13_input.txt'
 f = open(fileName, 'r')
 line = f.readline()
 

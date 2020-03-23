@@ -17,26 +17,22 @@ def utilityToGo(tasks, currentStep, numCycles, restart):
     utilitiesToGo = [0 for _ in tasks]
 
     for it, task in enumerate(tasks):
-        utility, preparation = task['utility'], task['preparation'],
-        for c in range(cyclesLeft):
-            if preparation < restart:
-                utilitiesToGo[it] += 0
-                preparation += 1
-            else:
-                utilitiesToGo[it] += utility
+        expectedUtility, preparation = task['utility'], task['preparation'],
+        utilitiesToGo[it] = expectedUtility * (cyclesLeft-restart)
     return utilitiesToGo
 
+def calculateExpectedUtility(utilityHistory):
+    expectedUtility = sum(utilityHistory)/len(utilityHistory)
+    return expectedUtility
 
-def calculateUtilityWithMemoryFactor(memoryFactor, currentStep, utilityHistory):
+def calculateUtilityWithMemoryFactor(memoryFactor, utilityHistory):
     if memoryFactor <= 0:
         raise Exception('Non valid memory factor {}'.format(memoryFactor))
-    denominator = sum([(i+1)**memoryFactor for i in range(currentStep)])
+    denominator = sum([(i+1)**memoryFactor for i in range(len(utilityHistory))])
     formulaTerms = [u*(((i+1)**memoryFactor)/denominator) for i, u in enumerate(utilityHistory)]
     utility = sum(formulaTerms)
     return utility
 
 
-def calculateExpectedUtility(utilityHistory):
-    expectedUtility = sum(utilityHistory)/len(utilityHistory)
-    return expectedUtility
+
 

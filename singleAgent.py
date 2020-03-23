@@ -25,37 +25,39 @@ class singleAgent:
             expectedUtility = calculateExpectedUtility(self.tasks[self.lastTaskIndex]['observedUtilityHistory'])
             self.tasks[self.lastTaskIndex]['utility'] = expectedUtility
         else:
-            newUtility = calculateUtilityWithMemoryFactor(self.memoryFactor, self.currentStep,
-                                                          self.tasks[self.lastTaskIndex]['observedUtilityHistory'])
-            self.tasks[self.lastTaskIndex]['utility'] = newUtility
+            expectedUtility = calculateUtilityWithMemoryFactor(self.memoryFactor,
+                                                               self.tasks[self.lastTaskIndex]['observedUtilityHistory'])
+            self.tasks[self.lastTaskIndex]['utility'] = expectedUtility
 
-        print('::[{}] Updated utility for {}, new value: {}'.format(self.name,
+        '''print('::[{}] Updated utility for {}, new value: {}'.format(self.name,
                                                                 self.tasks[self.lastTaskIndex]['name'],
-                                                                newUtility))
+                                                                expectedUtility))'''
 
     def chooseAndExecuteAction(self):
-        if self.decisionType == 'rationale':
-            # Chooses task with higher known utility
+        if self.decisionType == 'rationale' or \
+                self.decisionType == 'homogeneous-society' or \
+                self.decisionType == 'heterogeneous-society':
+
+            print('Iteration: {}'.format(self.currentStep))
+            currentExpectedUtilities = ['{}({:.2f}) ||'.format(i['name'], i['utility']) for i in self.tasks]
+            print('    {}   '.format(currentExpectedUtilities))
+
             utilitiesToGo = utilityToGo(self.tasks, self.currentStep, self.numCycles,
                                         self.restartCost)
-            actionIndex = utilitiesToGo.index(max(utilitiesToGo))
-            self.actOnTask(actionIndex)
+            maxUtilityValue = max(utilitiesToGo)
+            if maxUtilityValue > 0:
+                actionIndex = utilitiesToGo.index(maxUtilityValue)
+                self.actOnTask(actionIndex)
         elif self.decisionType == 'flexible':
             raise Exception('Not Implemented')
-        elif self.decisionType == 'homogeneous-society':
-            utilitiesToGo = utilityToGo(self.tasks, self.currentStep, self.numCycles,
-                                        self.restartCost)
-            actionIndex = utilitiesToGo.index(max(utilitiesToGo))
-            self.actOnTask(actionIndex)
-        elif self.decisionType == 'heterogeneous-society':
-            utilitiesToGo = utilityToGo(self.tasks, self.currentStep, self.numCycles,
-                                        self.restartCost)
-            actionIndex = utilitiesToGo.index(max(utilitiesToGo))
-            self.actOnTask(actionIndex)
         else:
             raise Exception('Unknown decision type {}'.format(self.decisionType))
 
     def actOnTask(self, index):
+        if index != self.lastTaskIndex and self.lastTaskIndex is not None:
+            # If I'm gonna change tasks, I loose all the preparation I had for the previous one
+            self.tasks[self.lastTaskIndex]['preparation'] = 0
+
         if self.tasks[index]['preparation'] < self.restartCost:
             self.prepareTask(index)
         else:
