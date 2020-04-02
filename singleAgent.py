@@ -17,16 +17,20 @@ class singleAgent:
     def newTask(self, task):
         self.tasks.append(task)
 
-    def updateTaskUtility(self, newUtility):
+    def updateTaskUtilities(self, newUtility):
         newUtility = float(newUtility)
-        self.tasks[self.lastTaskIndex]['observedUtilityHistory'].append(newUtility)
+        self.tasks[self.lastTaskIndex]['observedUtilityHistory'].append({
+            'step': self.currentStep,
+            'val': newUtility,
+        })
 
         if self.memoryFactor == 0:
             expectedUtility = calculateExpectedUtility(self.tasks[self.lastTaskIndex]['observedUtilityHistory'])
             self.tasks[self.lastTaskIndex]['utility'] = expectedUtility
         else:
             expectedUtility = calculateUtilityWithMemoryFactor(self.memoryFactor,
-                                                               self.tasks[self.lastTaskIndex]['observedUtilityHistory'])
+                                                               self.tasks[self.lastTaskIndex]['observedUtilityHistory'],
+                                                               self.currentStep)
             self.tasks[self.lastTaskIndex]['utility'] = expectedUtility
 
         '''print('::[{}] Updated utility for {}, new value: {}'.format(self.name,

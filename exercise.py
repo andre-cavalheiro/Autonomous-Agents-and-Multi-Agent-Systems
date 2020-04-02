@@ -60,9 +60,9 @@ class Agent:
             newUtility = splitInput[1].split('=')[1]
             if 'homogeneous' in self.configuration['decision']:
                 for a in self.agents.values():
-                    a.updateTaskUtility(newUtility)
+                    a.updateTaskUtilities(newUtility)
             else:
-                self.agents[agentName].updateTaskUtility(newUtility)
+                self.agents[agentName].updateTaskUtilities(newUtility)
 
             self.agents[agentName].addToGain(newUtility)
 
@@ -118,7 +118,7 @@ class Agent:
 #####################
 
 #fileName = 'statement\T03_input.txt'
-fileName = 'cases\T13_input.txt'
+fileName = 'cases\T07_input.txt'
 f = open(fileName, 'r')
 line = f.readline()
 
