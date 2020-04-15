@@ -1,11 +1,57 @@
-import math
 from scipy.optimize import linprog
 import numpy as np
-import math
 import itertools
 
+def calculateExpectedUtility(memoryFactor, utilityHistory):
+    '''
+    Calculate the expected utility for aspecific task taking into account its history of observations
 
-def utilityToGo(tasks, currentStep, numCycles, restart):
+    :param memoryFactor: int between one and zero
+    :param utilityHistory:
+    :return:
+    '''
+    if memoryFactor < 0 or memoryFactor > 1:
+        raise Exception('Non valid memory factor {}'.format(memoryFactor))
+    elif memoryFactor == 0:
+        utilityValues = [v['val'] for v in utilityHistory]
+        expectedUtility = sum(utilityValues) / len(utilityValues)
+    else:
+        denominator = sum([(u['step'])**memoryFactor for u in utilityHistory])
+        formulaTerms = [u['val']*(((u['step'])**memoryFactor)/denominator)
+                        for u in utilityHistory]
+        expectedUtility = sum(formulaTerms)
+    return expectedUtility
+
+
+def singleUtilityToGo(expectedUtility, preparation, cyclesLeft, preparationSteps):
+    '''
+        Calculate utility-to-go for one task taking.
+
+    :param expectedUtility: float
+    :param preparation: int
+    :param cyclesLeft: int
+    :param preparationSteps: int
+    :return:
+    '''
+    value = 0
+    for _ in range(cyclesLeft):
+        if preparation < preparationSteps:
+            preparation += 1
+        else:
+            value += expectedUtility
+    return value
+
+
+def calculateUtilityToGo(tasks, currentStep, numCycles, restartCost):
+    '''
+    Calculate utility-to-go value for all tasks
+
+    :param tasks: list of dictionaries
+    :param currentStep: int
+    :param numCycles: int
+    :param restartCost: int
+    :return:
+    '''
     '''
     :param tasks: array of dictionaries of the following form:
     {
@@ -23,37 +69,21 @@ def utilityToGo(tasks, currentStep, numCycles, restart):
 
     for it, task in enumerate(tasks):
         expectedUtility, preparation = task['utility'], task['preparation'],
-        utilitiesToGo[it] = singleUtilityToGo(expectedUtility, preparation, cyclesLeft, restart)
+        utilitiesToGo[it] = singleUtilityToGo(expectedUtility, preparation, cyclesLeft, restartCost)
     return utilitiesToGo
 
 
-def singleUtilityToGo(expectedUtility, preparation, cyclesLeft, restartCost):
-    value = 0
-    for _ in range(cyclesLeft):
-        if preparation < restartCost:
-            preparation += 1
-        else:
-            value += expectedUtility
-    return value
+def chooseOptimalTaskDistribution(concurrencyCost, agents, tasks, infoPerTaskPerAgent, cyclesRemaining, restartCost):
+    '''
 
-
-def calculateExpectedUtility(utilityHistory):
-    utilityValues = [v['val'] for v in utilityHistory]
-    expectedUtility = sum(utilityValues)/len(utilityValues)
-    return expectedUtility
-
-
-def calculateUtilityWithMemoryFactor(memoryFactor, utilityHistory):
-    if memoryFactor <= 0:
-        raise Exception('Non valid memory factor {}'.format(memoryFactor))
-    denominator = sum([(u['step'])**memoryFactor for u in utilityHistory])
-    formulaTerms = [u['val']*(((u['step'])**memoryFactor)/denominator)
-                    for u in utilityHistory]
-    utility = sum(formulaTerms)
-    return utility
-
-
-def chooseOptimalTaskDistribution(cost, agents, tasks, infoPerTaskPerAgent, cyclesRemaining, restartCost):
+    :param concurrencyCost: int
+    :param agents: list
+    :param tasks: list
+    :param infoPerTaskPerAgent: dictionary of dictionaries with keys being the values in agents and tasks respectively
+    :param cyclesRemaining:
+    :param restartCost:
+    :return:
+    '''
     combinations = [p for p in itertools.product(tasks, repeat=len(agents))]
     highestGain, bestIndex = None, -1
 
@@ -65,7 +95,7 @@ def chooseOptimalTaskDistribution(cost, agents, tasks, infoPerTaskPerAgent, cycl
             preparation = infoPerTaskPerAgent[agents[agtIndex]][tskName]['preparation']
 
             if not unique:
-                expectedUtility -= cost
+                expectedUtility -= concurrencyCost
 
             u2g = singleUtilityToGo(expectedUtility, preparation, cyclesRemaining, restartCost)
             gain += u2g
@@ -74,10 +104,11 @@ def chooseOptimalTaskDistribution(cost, agents, tasks, infoPerTaskPerAgent, cycl
             highestGain = gain
             bestIndex = combIndex
 
-    if bestIndex == -1:
+    if highestGain == None:
         raise Exception('Impossible to find optimal task distribution')
 
     return combinations[bestIndex]
+
 
 def chooseTaskPercentages(tasks):
     expectedUtilities, minObsUtilities = [], []
@@ -98,9 +129,6 @@ def chooseTaskPercentages(tasks):
 
 
 def assertActionsToTake(percentages):
-    percentages = [i * 1000 + 1 for i in percentages]
-    percentages = round_series_retain_integer_sum(percentages)
-    percentages = [i / 1000 for i in percentages]
     result = []
     for i, p in enumerate(percentages):
         if p>0.005:
@@ -109,16 +137,4 @@ def assertActionsToTake(percentages):
                 'percentage': p
             })
     return result
-
-
-def round_series_retain_integer_sum(xs):
-    N = sum(xs)
-    Rs = [math.trunc(x) for x in xs]
-    K = int(N - sum(Rs))
-    assert (K == round(K))
-    fs = [x - round(x) for x in xs]
-    indices = [i for order, (e, i) in enumerate(reversed(sorted((e, i) for i, e in enumerate(fs)))) if order < K]
-    ys = [R + 1 if i in indices else R for i, R in enumerate(Rs)]
-    return ys
-
 

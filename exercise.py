@@ -173,17 +173,17 @@ class Agent:
 printController = False
 
 # fileName = 'statement\T04_input.txt'
-fileName = 'cases\T10_input.txt'
+# fileName = 'cases\T10_input.txt'
 # fileName = 'mooshakCases\T19_alternative_input.txt'
 # fileName = 'mooshakCases\T19_input.txt'
-f = open(fileName, 'r')
-line = f.readline()
+# f = open(fileName, 'r')
+# line = f.readline()
 
-# line = sys.stdin.readline()
+line = sys.stdin.readline()
 agent = Agent(line.split(' '), printController)
 try:
-    # for line in sys.stdin:
-    for line in f:
+    # for line in f:
+    for line in sys.stdin:
         if line.startswith("end"): break
         elif line.startswith("TIK"): agent.decide_act()
         else: agent.perceive(line)

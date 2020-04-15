@@ -31,17 +31,13 @@ class singleAgent:
             print('::[{}] New utility for {}, of value: {}'.format(self.name,
                                                                     self.tasks[taskIdentifier]['name'],
                                                                     newUtility))
-        if self.memoryFactor == 0:
-            expectedUtility = calculateExpectedUtility(self.tasks[taskIdentifier]['observedUtilityHistory'])
-            self.tasks[taskIdentifier]['utility'] = expectedUtility
-        else:
-            expectedUtility = calculateUtilityWithMemoryFactor(self.memoryFactor,
-                                                               self.tasks[taskIdentifier]['observedUtilityHistory'])
-            self.tasks[taskIdentifier]['utility'] = expectedUtility
+
+        expectedUtility = calculateExpectedUtility(self.memoryFactor, self.tasks[taskIdentifier]['observedUtilityHistory'])
+        self.tasks[taskIdentifier]['utility'] = expectedUtility
 
     def chooseAndExecuteAction(self):
 
-        utilitiesToGo = utilityToGo(self.tasks, self.currentStep, self.numCycles,
+        utilitiesToGo = calculateUtilityToGo(self.tasks, self.currentStep, self.numCycles,
                                     self.restartCost)
         if self.printController:
             print('======================================')
