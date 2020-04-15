@@ -1,4 +1,4 @@
-# utility-based-Autonomous-Multi-Agent-exercise
+# Autonomous-Multi-Agent-exercise
 
 This was a mini-project for the course of _Autonomous Agents and Multi-Agent Systems_ I did in my Masters in Tecnico Lisboa.
 
