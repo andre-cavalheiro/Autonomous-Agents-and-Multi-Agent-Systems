@@ -1,0 +1,22 @@
+cycle=5 agents=[A1,A2] decision=heterogeneous-society restart=0 memory-factor=0.0 concurrency-penalty=0
+T0 u=5
+T1 u=-1
+TIK
+A1 u=4
+A2 u=-1
+T2 u=-2
+TIK
+A1 u=-1
+T3 u=4
+TIK
+A1 u=9
+A2 u=3
+T4 u=7
+T5 u=3
+TIK
+A1 u=6
+A2 u=5
+TIK
+A1 u=3
+A2 u=2
+end

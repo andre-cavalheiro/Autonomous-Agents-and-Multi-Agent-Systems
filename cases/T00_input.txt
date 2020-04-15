@@ -1,0 +1,32 @@
+cycle=10 decision=rationale restart=0 memory-factor=0.0
+T0 u=5
+T1 u=7
+TIK
+A u=6
+T2 u=6
+TIK
+A u=3
+TIK
+A u=7
+T3 u=-1
+T4 u=10
+T5 u=-1
+TIK
+A u=5
+T6 u=7
+TIK
+A u=3
+TIK
+A u=10
+T7 u=8
+TIK
+A u=8
+TIK
+A u=9
+T8 u=2
+TIK
+A u=6
+T9 u=2
+TIK
+A u=5
+end

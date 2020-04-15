@@ -1,0 +1,112 @@
+cycle=20 agents=[A1,A2,A3,A4] decision=heterogeneous-society restart=0 memory-factor=0.0 concurrency-penalty=0
+T0 u=1
+T1 u=9
+TIK
+A1 u=-2
+A2 u=6
+A3 u=-1
+A4 u=6
+T2 u=-2
+TIK
+A1 u=9
+A2 u=3
+A3 u=1
+A4 u=8
+TIK
+A1 u=5
+A2 u=-1
+A3 u=-1
+A4 u=-1
+T3 u=2
+TIK
+A1 u=8
+A2 u=2
+A3 u=3
+A4 u=0
+T4 u=6
+T5 u=8
+TIK
+A1 u=1
+A2 u=-2
+A3 u=5
+A4 u=3
+T6 u=0
+TIK
+A1 u=9
+A2 u=3
+A3 u=0
+A4 u=9
+T7 u=8
+TIK
+A1 u=-1
+A2 u=1
+A3 u=8
+A4 u=9
+TIK
+A1 u=7
+A2 u=7
+A3 u=7
+A4 u=-1
+T8 u=2
+TIK
+A1 u=0
+A2 u=5
+A3 u=7
+A4 u=5
+T9 u=7
+TIK
+A1 u=4
+A2 u=5
+A3 u=-1
+A4 u=5
+TIK
+A1 u=7
+A2 u=-1
+A3 u=4
+A4 u=7
+TIK
+A1 u=-1
+A2 u=4
+A3 u=9
+A4 u=4
+TIK
+A1 u=9
+A2 u=3
+A3 u=0
+A4 u=8
+TIK
+A1 u=7
+A2 u=7
+A3 u=-1
+A4 u=-2
+TIK
+A1 u=6
+A2 u=3
+A3 u=5
+A4 u=0
+TIK
+A1 u=3
+A2 u=5
+A3 u=4
+A4 u=4
+TIK
+A1 u=-2
+A2 u=3
+A3 u=4
+A4 u=5
+TIK
+A1 u=8
+A2 u=3
+A3 u=3
+A4 u=3
+TIK
+A1 u=0
+A2 u=2
+A3 u=-1
+A4 u=3
+TIK
+A1 u=7
+A2 u=7
+A3 u=6
+A4 u=4
+end

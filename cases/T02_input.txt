@@ -1,0 +1,212 @@
+cycle=100 decision=rationale restart=0 memory-factor=0.0
+T0 u=13
+T1 u=19
+TIK
+A u=9
+T2 u=11
+TIK
+A u=8
+TIK
+A u=13
+T3 u=18
+T4 u=-2
+T5 u=13
+TIK
+A u=18
+T6 u=7
+TIK
+A u=8
+TIK
+A u=9
+T7 u=5
+TIK
+A u=6
+TIK
+A u=1
+T8 u=3
+TIK
+A u=3
+T9 u=3
+TIK
+A u=14
+TIK
+A u=0
+TIK
+A u=7
+TIK
+A u=15
+TIK
+A u=19
+TIK
+A u=6
+TIK
+A u=19
+TIK
+A u=19
+TIK
+A u=4
+TIK
+A u=9
+TIK
+A u=4
+TIK
+A u=8
+TIK
+A u=16
+TIK
+A u=7
+TIK
+A u=11
+TIK
+A u=10
+TIK
+A u=19
+TIK
+A u=13
+TIK
+A u=9
+TIK
+A u=19
+TIK
+A u=17
+TIK
+A u=11
+TIK
+A u=15
+TIK
+A u=4
+TIK
+A u=17
+TIK
+A u=19
+TIK
+A u=12
+TIK
+A u=5
+TIK
+A u=15
+TIK
+A u=10
+TIK
+A u=18
+TIK
+A u=8
+TIK
+A u=7
+TIK
+A u=17
+TIK
+A u=17
+TIK
+A u=17
+TIK
+A u=13
+TIK
+A u=3
+TIK
+A u=15
+TIK
+A u=12
+TIK
+A u=4
+TIK
+A u=3
+TIK
+A u=6
+TIK
+A u=8
+TIK
+A u=6
+TIK
+A u=18
+TIK
+A u=10
+TIK
+A u=4
+TIK
+A u=13
+TIK
+A u=19
+TIK
+A u=6
+TIK
+A u=10
+TIK
+A u=4
+TIK
+A u=12
+TIK
+A u=4
+TIK
+A u=18
+TIK
+A u=6
+TIK
+A u=10
+TIK
+A u=12
+TIK
+A u=17
+TIK
+A u=6
+TIK
+A u=4
+TIK
+A u=15
+TIK
+A u=7
+TIK
+A u=4
+TIK
+A u=19
+TIK
+A u=11
+TIK
+A u=3
+TIK
+A u=12
+TIK
+A u=12
+TIK
+A u=5
+TIK
+A u=13
+TIK
+A u=10
+TIK
+A u=12
+TIK
+A u=18
+TIK
+A u=12
+TIK
+A u=10
+TIK
+A u=13
+TIK
+A u=4
+TIK
+A u=3
+TIK
+A u=6
+TIK
+A u=11
+TIK
+A u=16
+TIK
+A u=16
+TIK
+A u=14
+TIK
+A u=5
+TIK
+A u=11
+TIK
+A u=18
+TIK
+A u=4
+TIK
+A u=5
+TIK
+A u=17
+end

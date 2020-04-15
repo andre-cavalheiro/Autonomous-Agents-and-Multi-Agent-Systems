@@ -1,0 +1,31 @@
+cycle=10 agents=[A1,A2] decision=heterogeneous-society restart=1 memory-factor=0.5 concurrency-penalty=0
+T0 u=8
+T1 u=1
+TIK
+T2 u=7
+TIK
+A1 u=8
+A2 u=9
+TIK
+A1 u=-2
+A2 u=8
+T3 u=-2
+TIK
+A2 u=4
+TIK
+A1 u=8
+A2 u=1
+TIK
+A1 u=7
+TIK
+A1 u=-1
+A2 u=-1
+TIK
+A1 u=8
+TIK
+A1 u=2
+A2 u=0
+TIK
+A1 u=9
+A2 u=6
+end

@@ -1,0 +1,128 @@
+cycle=20 agents=[A1,A2,A3,A4,A5] decision=heterogeneous-society restart=0 memory-factor=0.4 concurrency-penalty=2
+T0 u=6
+T1 u=12
+TIK
+A1 u=13
+A2 u=10
+A3 u=13
+A4 u=8
+A5 u=4
+T2 u=13
+TIK
+A1 u=6
+A2 u=5
+A3 u=16
+A4 u=6
+A5 u=7
+TIK
+A1 u=7
+A2 u=5
+A3 u=10
+A4 u=2
+A5 u=17
+T3 u=12
+T4 u=19
+T5 u=0
+TIK
+A1 u=17
+A2 u=16
+A3 u=13
+A4 u=-2
+A5 u=7
+TIK
+A1 u=10
+A2 u=14
+A3 u=6
+A4 u=6
+A5 u=4
+TIK
+A1 u=5
+A2 u=-1
+A3 u=5
+A4 u=15
+A5 u=12
+TIK
+A1 u=13
+A2 u=14
+A3 u=1
+A4 u=15
+A5 u=1
+TIK
+A1 u=1
+A2 u=5
+A3 u=18
+A4 u=3
+A5 u=17
+TIK
+A1 u=4
+A2 u=17
+A3 u=6
+A4 u=10
+A5 u=16
+TIK
+A1 u=8
+A2 u=16
+A3 u=15
+A4 u=9
+A5 u=9
+TIK
+A1 u=3
+A2 u=15
+A3 u=-1
+A4 u=14
+A5 u=8
+TIK
+A1 u=4
+A2 u=7
+A3 u=6
+A4 u=14
+A5 u=7
+TIK
+A1 u=1
+A2 u=2
+A3 u=18
+A4 u=3
+A5 u=4
+TIK
+A1 u=0
+A2 u=7
+A3 u=2
+A4 u=10
+A5 u=10
+TIK
+A1 u=12
+A2 u=14
+A3 u=4
+A4 u=5
+A5 u=3
+TIK
+A1 u=0
+A2 u=17
+A3 u=4
+A4 u=14
+A5 u=14
+TIK
+A1 u=13
+A2 u=14
+A3 u=16
+A4 u=16
+A5 u=12
+TIK
+A1 u=10
+A2 u=9
+A3 u=7
+A4 u=5
+A5 u=10
+TIK
+A1 u=4
+A2 u=7
+A3 u=19
+A4 u=17
+A5 u=14
+TIK
+A1 u=5
+A2 u=5
+A3 u=14
+A4 u=10
+A5 u=14
+end

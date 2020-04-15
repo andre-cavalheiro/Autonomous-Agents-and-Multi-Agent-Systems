@@ -1,0 +1,33 @@
+cycle=10 agents=[A1,A2,A3] decision=homogeneous-society restart=1 memory-factor=0.3 concurrentCost=0
+T0 u=7
+T1 u=7
+TIK
+T2 u=6
+TIK
+A1 u=3
+A2 u=5
+A3 u=7
+TIK
+T3 u=7
+T4 u=6
+T5 u=-1
+TIK
+A1 u=3
+A2 u=3
+A3 u=3
+TIK
+TIK
+A1 u=1
+A2 u=6
+A3 u=-2
+TIK
+TIK
+A1 u=3
+A2 u=7
+A3 u=4
+TIK
+A1 u=4
+A2 u=5
+A3 u=7
+TIK
+end
