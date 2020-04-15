@@ -14,9 +14,10 @@ class Agent:
     multiAgent = False
 
     def __init__(self, options, printController):
+
         self.printController = printController
         ignoreTerms = ['', '\n']
-        integerParameters = ['cycle', 'restart']
+        integerParameters = ['cycle', 'restart', 'concurrency-penalty']
         floatParameters = ['memory-factor']
         for i in range(len(options)):
             if options[i] in ignoreTerms:
@@ -32,12 +33,14 @@ class Agent:
             self.configuration['restart'] = 0
         if 'memory-factor' not in self.configuration.keys():
             self.configuration['memory-factor'] = 0
-
+        if 'concurrency-penalty' not in self.configuration.keys():
+            self.configuration['concurrency-penalty'] = None
         if self.printController:
             self.printParams()
         self.initAgents()
 
     def initAgents(self):
+        self.currentStep = 0
         if 'society' in self.configuration['decision']:
             self.multiAgent = True
             assert('agents' in self.configuration.keys())
@@ -83,8 +86,10 @@ class Agent:
                 agentName = splitInput[0]
                 newUtility = splitInput[1].split('=')[1]
                 if 'homogeneous' in self.configuration['decision']:
+                    taskName = self.agents[agentName].getLastTaskName()
                     for a in self.agents.values():
-                        a.updateTaskUtilities(newUtility)
+                        taskIndex = a.getTaskIndexByName(taskName)
+                        a.updateTaskUtilities(newUtility, taskIndex)
                 else:
                     self.agents[agentName].updateTaskUtilities(newUtility)
                 self.agents[agentName].addToGain(newUtility)
@@ -93,12 +98,30 @@ class Agent:
             raise Exception('Unknown perception: {}'.format(input))
 
     def decide_act(self):
-        executedTasks, executingAgents = [None for _ in range(len(self.agents))], [None for _ in range(len(self.agents))]
-        for k, a in enumerate(self.agents.items()):
-            taskName = a.chooseAndExecuteAction()
-            executingAgents.append(k)
-            executedTasks.append(taskName)
-            a.incrementStep()
+        if self.configuration['concurrency-penalty'] is None:
+            for k, a in self.agents.items():
+                a.chooseAndExecuteAction()
+                a.incrementStep()
+                self.currentStep+=1
+        else:
+            infoPerTaskPerAgent = {}
+            for k, a in self.agents.items():
+                infoPerTaskPerAgent[k] = a.getTasks()
+            agents = list(self.agents.keys())
+            tasks = list(infoPerTaskPerAgent[agents[0]].keys())
+            '''optimalDistribution = chooseOptimalTaskDistribution(self.configuration['concurrency-penalty'],
+                                        agents, tasks, infoPerTaskPerAgent)'''
+            optimalDistribution = chooseOptimalTaskDistribution(self.configuration['concurrency-penalty'],
+                                                                agents, tasks, infoPerTaskPerAgent,
+                                                                self.configuration['cycle']-self.currentStep,
+                                                                self.configuration['restart'])
+            #print(optimalDistribution)
+            for agtIndex, taskName in enumerate(optimalDistribution):
+                tskIndex = self.agents[agents[agtIndex]].getTaskIndexByName(taskName)
+                self.agents[agents[agtIndex]].actOnTask(tskIndex)
+                self.agents[agents[agtIndex]].incrementStep()
+
+            self.currentStep+=1
 
     def recharge(self):
         statment = 'state={' if self.multiAgent else 'state='
@@ -149,18 +172,17 @@ class Agent:
 # To run in the traditional way: 'cat 'cases/T00_input.txt' | py .\exercise.py'
 printController = False
 
-# fixme - mooshak 12!!!
-
 # fileName = 'statement\T04_input.txt'
-# fileName = 'cases\T08_input.txt'
-fileName = 'mooshakCases\T18_input.txt'
+fileName = 'cases\T10_input.txt'
+# fileName = 'mooshakCases\T19_alternative_input.txt'
+# fileName = 'mooshakCases\T19_input.txt'
 f = open(fileName, 'r')
 line = f.readline()
 
-#line = sys.stdin.readline()
+# line = sys.stdin.readline()
 agent = Agent(line.split(' '), printController)
 try:
-    #for line in sys.stdin:
+    # for line in sys.stdin:
     for line in f:
         if line.startswith("end"): break
         elif line.startswith("TIK"): agent.decide_act()

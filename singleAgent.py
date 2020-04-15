@@ -62,7 +62,6 @@ class singleAgent:
             if maxUtilityValue > 0:
                 actionIndex = utilitiesToGo.index(maxUtilityValue)
                 self.actOnTask(actionIndex)
-                return self.tasks[actionIndex]['name']
         elif 'flexible' in self.decisionType:
             percentagesPerTask = chooseTaskPercentages(self.tasks)
             actions = assertActionsToTake(percentagesPerTask)
@@ -131,3 +130,16 @@ class singleAgent:
         for i, t in enumerate(self.tasks):
             if t['name'] == name:
                 return i
+
+    def getTasks(self):
+        currentUtils = {
+            t['name']: {
+                'utility': t['utility'],
+                'preparation': t['preparation']
+                }
+            for t in self.tasks
+        }
+        return currentUtils
+
+    def getLastTaskName(self):
+        return self.tasks[self.lastTaskIndex]['name']
