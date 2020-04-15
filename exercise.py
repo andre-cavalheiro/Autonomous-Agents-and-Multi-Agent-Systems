@@ -1,6 +1,6 @@
 import sys
 import traceback
-
+import math
 from utils import *
 from singleAgent import singleAgent
 
@@ -13,7 +13,8 @@ class Agent:
     configuration = {}
     multiAgent = False
 
-    def __init__(self, options):
+    def __init__(self, options, printController):
+        self.printController = printController
         ignoreTerms = ['', '\n']
         integerParameters = ['cycle', 'restart']
         floatParameters = ['memory-factor']
@@ -32,7 +33,8 @@ class Agent:
         if 'memory-factor' not in self.configuration.keys():
             self.configuration['memory-factor'] = 0
 
-        self.printParams()
+        if self.printController:
+            self.printParams()
         self.initAgents()
 
     def initAgents(self):
@@ -55,36 +57,61 @@ class Agent:
 
         elif input.startswith('A'):
             # Update utility
-            splitInput = input.split(' ')
-            agentName = splitInput[0]
-            newUtility = splitInput[1].split('=')[1]
-            if 'homogeneous' in self.configuration['decision']:
-                for a in self.agents.values():
-                    a.updateTaskUtilities(newUtility)
-            else:
-                self.agents[agentName].updateTaskUtilities(newUtility)
+            if 'flexible' in self.configuration['decision']:
+                # A u = {T1 = 3, T2 = 2}
+                splitInput = input.split(' ')
+                agentName = splitInput[0]
+                remainingInfo = splitInput[1].split('u=')
 
-            self.agents[agentName].addToGain(newUtility)
+                if remainingInfo[1].startswith('{'):
+                    remainingInfo = remainingInfo[1].replace('\n', '').replace('{', '').replace('}', '').split(',')
+                    utilityPerTask = {}
+                    for task in remainingInfo:
+                        taskInfo = task.split('=')
+                        utilityPerTask[taskInfo[0]] = float(taskInfo[1])
+                    for k, v in utilityPerTask.items():
+                        taskIndex = self.agents[agentName].getTaskIndexByName(k)
+                        self.agents[agentName].updateTaskUtilities(v, taskIndex)
+                    self.agents[agentName].addToGain(utilityPerTask)
+                else:
+                    newUtility = remainingInfo[1]
+                    self.agents[agentName].updateTaskUtilities(newUtility)
+                    self.agents[agentName].addToGain(newUtility)
+
+            else:
+                splitInput = input.split(' ')
+                agentName = splitInput[0]
+                newUtility = splitInput[1].split('=')[1]
+                if 'homogeneous' in self.configuration['decision']:
+                    for a in self.agents.values():
+                        a.updateTaskUtilities(newUtility)
+                else:
+                    self.agents[agentName].updateTaskUtilities(newUtility)
+                self.agents[agentName].addToGain(newUtility)
 
         else:
             raise Exception('Unknown perception: {}'.format(input))
 
     def decide_act(self):
-        for k, a in self.agents.items():
-            a.chooseAndExecuteAction()
+        executedTasks, executingAgents = [None for _ in range(len(self.agents))], [None for _ in range(len(self.agents))]
+        for k, a in enumerate(self.agents.items()):
+            taskName = a.chooseAndExecuteAction()
+            executingAgents.append(k)
+            executedTasks.append(taskName)
             a.incrementStep()
 
     def recharge(self):
         statment = 'state={' if self.multiAgent else 'state='
         gain = 0
-        for k, a in self.agents.items():
+        for i, (k, a) in enumerate(self.agents.items()):
             agentResults = a.getFinalStatment(self.multiAgent)
             statment += agentResults
             gain += a.getGain()
-            if self.multiAgent:
+            if self.multiAgent and i != len(self.agents)-1:
                 statment += ','
         if self.multiAgent:
             statment += '}'
+
         statment += ' gain={:.2f}'.format(gain)
         return statment
 
@@ -92,6 +119,7 @@ class Agent:
         task = {
                 'name': name,
                 'executed': False,
+                'executePercentage': 0,
                 'preparation': 0,
                 'utility': float(utility),
                 'observedUtilityHistory': [],
@@ -103,7 +131,9 @@ class Agent:
                                self.configuration['decision'],
                                self.configuration['restart'],
                                self.configuration['memory-factor'],
-                               self.configuration['cycle'])
+                               self.configuration['cycle'],
+                               self.configuration['concurrency-penalty'],
+                               self.printController)
         return newAgent
 
     def printParams(self):
@@ -116,20 +146,25 @@ class Agent:
 #####################
 ### B: MAIN UTILS ###
 #####################
+# To run in the traditional way: 'cat 'cases/T00_input.txt' | py .\exercise.py'
+printController = False
 
-#fileName = 'statement\T03_input.txt'
-fileName = 'cases\T07_input.txt'
+# fixme - mooshak 12!!!
+
+# fileName = 'statement\T04_input.txt'
+# fileName = 'cases\T08_input.txt'
+fileName = 'mooshakCases\T18_input.txt'
 f = open(fileName, 'r')
 line = f.readline()
 
-# line = sys.stdin.readline()
-agent = Agent(line.split(' '))
+#line = sys.stdin.readline()
+agent = Agent(line.split(' '), printController)
 try:
-    # for line in sys.stdin:
+    #for line in sys.stdin:
     for line in f:
         if line.startswith("end"): break
         elif line.startswith("TIK"): agent.decide_act()
         else: agent.perceive(line)
-    sys.stdout.write(agent.recharge()+'\n');
+    sys.stdout.write(agent.recharge()+'\n')
 except:
     print(traceback.format_exc())

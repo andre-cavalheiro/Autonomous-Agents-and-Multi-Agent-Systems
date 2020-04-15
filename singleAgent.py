@@ -2,12 +2,14 @@ from utils import *
 
 class singleAgent:
 
-    def __init__(self, name, decisionType, restartCost, memoryFactor, numCyles):
+    def __init__(self, name, decisionType, restartCost, memoryFactor, numCyles, concurrencyPenalty, printController):
         self.name = name
         self.decisionType = decisionType
         self.restartCost = restartCost
         self.memoryFactor = memoryFactor
         self.numCycles = numCyles
+        self.printController = printController
+        self.concurrencyPenalty = concurrencyPenalty
 
         self.tasks = []
         self.lastTaskIndex = None
@@ -17,70 +19,100 @@ class singleAgent:
     def newTask(self, task):
         self.tasks.append(task)
 
-    def updateTaskUtilities(self, newUtility):
+    def updateTaskUtilities(self, newUtility, taskName=None):
+        taskIdentifier = taskName if taskName is not None else self.lastTaskIndex
+
         newUtility = float(newUtility)
-        self.tasks[self.lastTaskIndex]['observedUtilityHistory'].append({
+        self.tasks[taskIdentifier]['observedUtilityHistory'].append({
             'step': self.currentStep,
             'val': newUtility,
         })
-
+        if self.printController:
+            print('::[{}] New utility for {}, of value: {}'.format(self.name,
+                                                                    self.tasks[taskIdentifier]['name'],
+                                                                    newUtility))
         if self.memoryFactor == 0:
-            expectedUtility = calculateExpectedUtility(self.tasks[self.lastTaskIndex]['observedUtilityHistory'])
-            self.tasks[self.lastTaskIndex]['utility'] = expectedUtility
+            expectedUtility = calculateExpectedUtility(self.tasks[taskIdentifier]['observedUtilityHistory'])
+            self.tasks[taskIdentifier]['utility'] = expectedUtility
         else:
             expectedUtility = calculateUtilityWithMemoryFactor(self.memoryFactor,
-                                                               self.tasks[self.lastTaskIndex]['observedUtilityHistory'],
-                                                               self.currentStep)
-            self.tasks[self.lastTaskIndex]['utility'] = expectedUtility
-
-        '''print('::[{}] Updated utility for {}, new value: {}'.format(self.name,
-                                                                self.tasks[self.lastTaskIndex]['name'],
-                                                                expectedUtility))'''
+                                                               self.tasks[taskIdentifier]['observedUtilityHistory'])
+            self.tasks[taskIdentifier]['utility'] = expectedUtility
 
     def chooseAndExecuteAction(self):
+
+        utilitiesToGo = utilityToGo(self.tasks, self.currentStep, self.numCycles,
+                                    self.restartCost)
+        if self.printController:
+            print('======================================')
+            print('======================================')
+            print('Iteration: {}'.format(self.currentStep))
+            currentExpectedUtilitiesSTR = ['{}({:.2f}) ||'.format(i['name'], i['utility']) for i in self.tasks]
+            print('U    {}   '.format(currentExpectedUtilitiesSTR))
+            preparationStepsSTR = ['{}({:.2f}) ||'.format(i['name'], i['preparation']) for i in self.tasks]
+            print('P    {}   '.format(preparationStepsSTR))
+            utilitiesToGoSTR = ['{}({:.2f}) ||'.format(self.tasks[i]['name'], v) for i, v in enumerate(utilitiesToGo)]
+            print('U2G    {}   '.format(utilitiesToGoSTR))
+
         if self.decisionType == 'rationale' or \
                 self.decisionType == 'homogeneous-society' or \
                 self.decisionType == 'heterogeneous-society':
 
-            print('Iteration: {}'.format(self.currentStep))
-            currentExpectedUtilities = ['{}({:.2f}) ||'.format(i['name'], i['utility']) for i in self.tasks]
-            print('    {}   '.format(currentExpectedUtilities))
-
-            utilitiesToGo = utilityToGo(self.tasks, self.currentStep, self.numCycles,
-                                        self.restartCost)
             maxUtilityValue = max(utilitiesToGo)
             if maxUtilityValue > 0:
                 actionIndex = utilitiesToGo.index(maxUtilityValue)
                 self.actOnTask(actionIndex)
-        elif self.decisionType == 'flexible':
-            raise Exception('Not Implemented')
+                return self.tasks[actionIndex]['name']
+        elif 'flexible' in self.decisionType:
+            percentagesPerTask = chooseTaskPercentages(self.tasks)
+            actions = assertActionsToTake(percentagesPerTask)
+
+            if len(actions) > 1:
+                str = '{'
+                for a in actions:
+                    self.actOnTask(a['index'], a['percentage'])
+                    str += '{}={:.2f},'.format(self.tasks[a['index']]['name'], a['percentage'])
+                str = str[:-1]  # Remove last colon
+                str += '}'
+                print(str)
+            else:
+                self.actOnTask(actions[0]['index'], actions[0]['percentage'])
         else:
             raise Exception('Unknown decision type {}'.format(self.decisionType))
 
-    def actOnTask(self, index):
-        if index != self.lastTaskIndex and self.lastTaskIndex is not None:
-            # If I'm gonna change tasks, I loose all the preparation I had for the previous one
-            self.tasks[self.lastTaskIndex]['preparation'] = 0
+    def actOnTask(self, index, percentage=1):
+        # Set all of the preparation steps that are NOT of the current task to zero
+        for i in range(len(self.tasks)):
+            if i != index:
+                self.tasks[i]['preparation'] = 0
 
         if self.tasks[index]['preparation'] < self.restartCost:
             self.prepareTask(index)
         else:
-            self.executeTask(index)
+            self.executeTask(index, percentage)
 
     def prepareTask(self, index):
         self.tasks[index]['preparation'] += 1
-        print('>>[{}] Preparation step for task {}'.format(self.name, self.tasks[index]['name']))
+        if self.printController:
+            print('>>[{}] Preparation step for task {}'.format(self.name, self.tasks[index]['name']))
 
-    def executeTask(self, index):
+    def executeTask(self, index, percentage=1):
         self.tasks[index]['executed'] = True
+        self.tasks[index]['executePercentage'] = percentage
         self.lastTaskIndex = index
-        print('->[{}] Executed task {}'.format(self.name, self.tasks[index]['name']))
+        if self.printController:
+            print('->[{}] Executed task {} w/ percentage {}'.format(self.name, self.tasks[index]['name'], percentage))
 
     def incrementStep(self):
         self.currentStep += 1
 
-    def addToGain(self, observedUtility):
-        self.gain += float(observedUtility)
+    def addToGain(self, observedUtilities):
+        if isinstance(observedUtilities, dict):
+            for k, v in observedUtilities.items():
+                index = self.getTaskIndexByName(k)
+                self.gain += self.tasks[index]['executePercentage']*v
+        else:
+            self.gain += float(observedUtilities)
 
     def getGain(self):
         return self.gain
@@ -94,3 +126,8 @@ class singleAgent:
                 agentResults += ','
         agentResults += '}'
         return agentResults
+
+    def getTaskIndexByName(self, name):
+        for i, t in enumerate(self.tasks):
+            if t['name'] == name:
+                return i
